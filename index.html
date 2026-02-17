@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fingerprint Attendance</title>
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+        }
+
+        .student {
+            padding: 10px;
+            margin: 10px;
+            border: 1px solid black;
+            cursor: pointer;
+        }
+
+        .present {
+            background-color: lightgreen;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Fingerprint Attendance</h2>
+
+<div id="students"></div>
+
+<script>
+    const students = ["Rahul", "Priya", "Arjun", "Sneha"];
+    let attendance = [];
+
+    const container = document.getElementById("students");
+
+    students.forEach(name => {
+        const div = document.createElement("div");
+        div.className = "student";
+        div.innerText = name;
+        div.onclick = () => authenticate(name, div);
+        container.appendChild(div);
+    });
+
+    async function authenticate(name, element) {
+
+        if (!window.PublicKeyCredential) {
+            alert("Fingerprint not supported on this device.");
+            return;
+        }
+
+        try {
+            const challenge = new Uint8Array(32);
+            window.crypto.getRandomValues(challenge);
+
+            await navigator.credentials.get({
+                publicKey: {
+                    challenge: challenge,
+                    timeout: 60000,
+                    userVerification: "required"
+                }
+            });
+
+            attendance.push(name);
+            element.classList.add("present");
+            alert(name + " marked present!");
+
+        } catch (err) {
+            alert("Authentication failed.");
+        }
+    }
+</script>
+
+</body>
+</html>
